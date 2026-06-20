@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class MapStrategy implements CollectionStrategy {
@@ -6,24 +7,23 @@ public class MapStrategy implements CollectionStrategy {
     private final String className;
 
     public MapStrategy() {
-        int choice = new Random().nextInt(3);
-        if (choice == 0) {
-            this.map = new HashMap<>();
-            this.className = "HashMap";
-        } else if (choice == 1) {
-            this.map = new LinkedHashMap<>();
-            this.className = "LinkedHashMap";
-        } else {
-            this.map = new TreeMap<>();
-            this.className = "TreeMap";
-        }
+        List<Supplier<Map<Integer, Integer>>> factories = List.of(
+                LinkedHashMap::new,
+                TreeMap::new
+        );
+
+        int choice = new Random().nextInt(factories.size());
+        this.map = factories.get(choice).get();
+        this.className = this.map.getClass().getSimpleName();
     }
 
     @Override
-    public String getInitCode() {return String.format("Map<Integer, Integer> map = new %s<>();\n", className);}
+    public String getInitCode() {
+        return String.format("Map<Integer, Integer> map = new %s<>();\n", className);
+    }
 
     @Override
-    public Object getRealCollection() {return map;}
+    public Object getRealCollection() { return map; }
 
     @Override
     public String addElement(int key, int value) {
@@ -38,13 +38,11 @@ public class MapStrategy implements CollectionStrategy {
     }
 
     @Override
-    public int getSize() {return map.size();}
+    public int getSize() { return map.size(); }
 
     @Override
-    public String getAnswer(){
-        return map.values().stream()
-                .map(String::valueOf)
-                .collect(Collectors.joining(","));
+    public String getAnswer() {
+        return map.values().stream().map(String::valueOf).collect(Collectors.joining(","));
     }
 }
 

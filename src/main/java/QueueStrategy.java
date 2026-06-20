@@ -1,19 +1,29 @@
-import java.util.ArrayDeque;
-import java.util.Queue;
+import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class QueueStrategy implements CollectionStrategy {
-    private final Queue<Integer> queue = new ArrayDeque<>();
+    private final Queue<Integer> queue;
+    private final String className;
+
+    public QueueStrategy() {
+        List<Supplier<Queue<Integer>>> factories = List.of(
+                ArrayDeque::new,
+                LinkedList::new
+        );
+
+        int choice = new Random().nextInt(factories.size());
+        this.queue = factories.get(choice).get();
+        this.className = this.queue.getClass().getSimpleName();
+    }
 
     @Override
     public String getInitCode() {
-        return "Queue<Integer> queue = new ArrayDeque<>();\n";
+        return String.format("Queue<Integer> queue = new %s<>();\n", className);
     }
 
     @Override
-    public Object getRealCollection() {
-        return queue;
-    }
+    public Object getRealCollection() { return queue; }
 
     @Override
     public String addElement(int keyOrIndex, int value) {
@@ -23,23 +33,18 @@ public class QueueStrategy implements CollectionStrategy {
 
     @Override
     public String removeElement(int keyOrIndex) {
-        if (queue.isEmpty()) {
-            return "";
-        }
+        if (queue.isEmpty()) return "";
         queue.remove();
         return "queue.remove();\n";
     }
 
     @Override
-    public int getSize() {
-        return queue.size();
-    }
+    public int getSize() { return queue.size(); }
 
     @Override
     public String getAnswer() {
-        return queue.stream()
-                .map(String::valueOf)
-                .collect(Collectors.joining(","));
+        return queue.stream().map(String::valueOf).collect(Collectors.joining(","));
     }
 }
+
 

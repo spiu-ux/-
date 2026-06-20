@@ -1,8 +1,18 @@
 import java.util.Random;
 
+import java.util.List;
+import java.util.Random;
+
 public class Generator {
     private static final Random random = new Random();
     private static final int[] NUMBER_POOL = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    private static final List<Producer<CollectionStrategy>> STRATEGY_FACTORIES = List.of(
+            MapStrategy::new,
+            ListStrategy::new,
+            SetStrategy::new,
+            QueueStrategy::new,
+            DequeStrategy::new
+    );
 
     public Result generateValidTask() {
         while (true) {
@@ -13,7 +23,6 @@ public class Generator {
             }
         }
     }
-
 
     private String generateCodeForStrategy(CollectionStrategy strategy) {
         StringBuilder codeBuilder = new StringBuilder();
@@ -47,16 +56,8 @@ public class Generator {
     }
 
     private CollectionStrategy getRandomStrategy() {
-        int choice = random.nextInt(4);
-        if (choice == 0) {
-            return new MapStrategy();
-        } else if (choice == 1) {
-            return new ListStrategy();
-        } else if (choice == 2) {
-            return new SetStrategy();
-        } else {
-            return new QueueStrategy();
-        }
+        int choice = random.nextInt(STRATEGY_FACTORIES.size());
+        Producer<CollectionStrategy> producer = STRATEGY_FACTORIES.get(choice);
+        return producer.produce();
     }
 }
-

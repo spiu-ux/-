@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class SetStrategy implements CollectionStrategy {
@@ -6,14 +7,14 @@ public class SetStrategy implements CollectionStrategy {
     private final String className;
 
     public SetStrategy() {
-        int choice = new Random().nextInt(2);
-        if (choice == 0) {
-            this.set = new LinkedHashSet<>();
-            this.className = "LinkedHashSet";
-        } else {
-            this.set = new TreeSet<>();
-            this.className = "TreeSet";
-        }
+        List<Supplier<Set<Integer>>> factories = List.of(
+                LinkedHashSet::new,
+                TreeSet::new
+        );
+
+        int choice = new Random().nextInt(factories.size());
+        this.set = factories.get(choice).get();
+        this.className = this.set.getClass().getSimpleName();
     }
 
     @Override
@@ -22,7 +23,7 @@ public class SetStrategy implements CollectionStrategy {
     }
 
     @Override
-    public Object getRealCollection() {return set;}
+    public Object getRealCollection() { return set; }
 
     @Override
     public String addElement(int keyOrIndex, int value) {
@@ -37,13 +38,12 @@ public class SetStrategy implements CollectionStrategy {
     }
 
     @Override
-    public int getSize() {return set.size();}
+    public int getSize() { return set.size(); }
 
     @Override
     public String getAnswer() {
-        return set.stream()
-                .map(String::valueOf)
-                .collect(Collectors.joining(","));
+        return set.stream().map(String::valueOf).collect(Collectors.joining(","));
     }
 }
+
 

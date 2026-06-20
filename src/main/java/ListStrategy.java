@@ -1,18 +1,20 @@
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class ListStrategy implements CollectionStrategy{
+public class ListStrategy implements CollectionStrategy {
     private final List<Integer> list;
     private final String className;
 
-    public ListStrategy(){
-        if (new Random().nextBoolean()) {
-            this.list = new ArrayList<>();
-            this.className = "ArrayList";
-        } else {
-            this.list = new LinkedList<>();
-            this.className = "LinkedList";
-        }
+    public ListStrategy() {
+        List<Supplier<List<Integer>>> factories = List.of(
+                ArrayList::new,
+                LinkedList::new
+        );
+
+        int choice = new Random().nextInt(factories.size());
+        this.list = factories.get(choice).get();
+        this.className = this.list.getClass().getSimpleName();
     }
 
     @Override
@@ -21,7 +23,7 @@ public class ListStrategy implements CollectionStrategy{
     }
 
     @Override
-    public Object getRealCollection() {return list;}
+    public Object getRealCollection() { return list; }
 
     @Override
     public String addElement(int keyOrIndex, int value) {
@@ -31,23 +33,18 @@ public class ListStrategy implements CollectionStrategy{
 
     @Override
     public String removeElement(int keyOrIndex) {
-        if (list.isEmpty()) {
-            return "";
-        }
+        if (list.isEmpty()) return "";
         int safeIndex = Math.abs(keyOrIndex) % list.size();
-
         list.remove(safeIndex);
         return String.format("list.remove(%d);\n", safeIndex);
     }
 
     @Override
-    public int getSize() {return list.size();}
+    public int getSize() { return list.size(); }
 
     @Override
     public String getAnswer() {
-        return list.stream()
-                .map(String::valueOf)
-                .collect(Collectors.joining(","));
+        return list.stream().map(String::valueOf).collect(Collectors.joining(","));
     }
 }
 
