@@ -7,10 +7,8 @@ public class Main {
     }
 
     private static void printTask(Result res) {
-        System.out.println("Задание");
-        System.out.print(res.getCode());
-        System.out.println("\nОтвет на задание ");
-        System.out.println(res.getAnswer());
+        System.out.printf("Задание\n%s\nОтвет на задание\n%s\n",
+                res.getCode(), res.getAnswer());
     }
 }
 
